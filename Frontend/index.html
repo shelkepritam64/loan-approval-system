@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Loan Approval System</title>
+  <meta name="description" content="Smart loan approval prediction system. Get instant loan eligibility results.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, .85);
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --accent-glow: rgba(99, 102, 241, .25);
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, .12);
+      --success-border: rgba(16, 185, 129, .3);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, .12);
+      --danger-border: rgba(239, 68, 68, .3);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: rgba(148, 163, 184, .12);
+      --input-bg: rgba(15, 23, 42, .6);
+      --radius: 14px;
+      --radius-sm: 10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow-x: hidden
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -40%;
+      left: -20%;
+      width: 70vw;
+      height: 70vw;
+      background: radial-gradient(circle, rgba(99, 102, 241, .08) 0%, transparent 70%);
+      pointer-events: none
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -30%;
+      right: -15%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(16, 185, 129, .06) 0%, transparent 70%);
+      pointer-events: none
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      position: relative;
+      z-index: 1
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeDown .6s ease
+    }
+
+    .header .logo {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 32px var(--accent-glow)
+    }
+
+    .header h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      background: linear-gradient(135deg, #fff 30%, var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .header p {
+      color: var(--text-secondary);
+      font-size: .88rem;
+      margin-top: 6px;
+      font-weight: 400
+    }
+
+    /* Card */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, .35);
+      animation: fadeUp .6s ease
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: rgba(15, 23, 42, .5);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      margin-bottom: 24px
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: .82rem;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .3s ease
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 16px var(--accent-glow)
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, .04)
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 18px;
+      animation: fadeUp .4s ease backwards
+    }
+
+    .form-group label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      letter-spacing: .02em;
+      text-transform: uppercase
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: .9rem;
+      transition: all .25s ease;
+      outline: none
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow)
+    }
+
+    .form-group input::placeholder {
+      color: var(--text-muted)
+    }
+
+    .form-group select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center
+    }
+
+    .form-group select option {
+      background: var(--bg-secondary);
+      color: var(--text-primary)
+    }
+
+    .form-group .error-msg {
+      color: var(--danger);
+      font-size: .72rem;
+      margin-top: 4px;
+      display: none
+    }
+
+    .form-group.invalid input,
+    .form-group.invalid select {
+      border-color: var(--danger)
+    }
+
+    .form-group.invalid .error-msg {
+      display: block
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    @media(max-width:480px) {
+      .row {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .personal-fields {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height .5s ease, opacity .4s ease
+    }
+
+    .personal-fields.show {
+      max-height: 600px;
+      opacity: 1
+    }
+
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0 18px;
+      color: var(--text-muted);
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-weight: 600
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border)
+    }
+
+    /* Button */
+    .btn-predict {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: #fff;
+      font-family: inherit;
+      font-size: .92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-top: 6px
+    }
+
+    .btn-predict:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px var(--accent-glow)
+    }
+
+    .btn-predict:active {
+      transform: translateY(0)
+    }
+
+    .btn-predict:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      transform: none
+    }
+
+    .btn-predict .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid rgba(255, 255, 255, .3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto
+    }
+
+    .btn-predict.loading .btn-text {
+      display: none
+    }
+
+    .btn-predict.loading .spinner {
+      display: block
+    }
+
+    /* Result */
+    .result-box {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: var(--radius-sm);
+      text-align: center;
+      font-weight: 600;
+      font-size: 1rem;
+      display: none;
+      animation: scaleIn .4s ease
+    }
+
+    .result-box.approved {
+      display: block;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--success)
+    }
+
+    .result-box.rejected {
+      display: block;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger)
+    }
+
+    .result-box .result-icon {
+      font-size: 2.2rem;
+      display: block;
+      margin-bottom: 6px
+    }
+
+    .result-box .result-sub {
+      font-size: .78rem;
+      font-weight: 400;
+      margin-top: 4px;
+      opacity: .8
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      color: var(--text-muted);
+      font-size: .72rem
+    }
+
+    .footer span {
+      color: var(--accent-light)
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-16px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(.92)
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">🏦</div>
+      <h1>Smart Loan Approval System</h1>
+      <p>Instant loan approval prediction</p>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-quick" onclick="switchTab('quick')">⚡ Quick Prediction</button>
+        <button class="tab-btn" id="tab-full" onclick="switchTab('full')">📋 Full Application</button>
+      </div>
+
+      <!-- Form -->
+      <form id="loanForm" novalidate>
+        <!-- Common Fields -->
+        <div class="form-group" style="animation-delay:.05s">
+          <label for="credit_score">Credit Score</label>
+          <input type="number" id="credit_score" placeholder="e.g. 720" min="300" max="900" required>
+          <div class="error-msg">Enter a valid score (300–900)</div>
+        </div>
+
+        <div class="row">
+          <div class="form-group" style="animation-delay:.1s">
+            <label for="income_annum">Annual Income ($)</label>
+            <input type="number" id="income_annum" placeholder="e.g. 65000" min="0" required>
+            <div class="error-msg">Enter a valid income</div>
+          </div>
+          <div class="form-group" style="animation-delay:.15s">
+            <label for="loan_amount">Loan Amount ($)</label>
+            <input type="number" id="loan_amount" placeholder="e.g. 25000" min="1" required>
+            <div class="error-msg">Enter a valid amount</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group" style="animation-delay:.2s">
+            <label for="employment_status">Employment Status</label>
+            <select id="employment_status" required>
+              <option value="" disabled selected>Select status</option>
+              <option value="Employed">Employed</option>
+              <option value="Self-Employed">Self-Employed</option>
+              <option value="Unemployed">Unemployed</option>
+            </select>
+            <div class="error-msg">Select a status</div>
+          </div>
+          <div class="form-group" style="animation-delay:.25s">
+            <label for="loan_term">Loan Term (months)</label>
+            <input type="number" id="loan_term" placeholder="e.g. 36" min="1" max="480" required>
+            <div class="error-msg">Enter a valid term (1–480)</div>
+          </div>
+        </div>
+
+        <!-- Personal Fields (Full Application) -->
+        <div class="personal-fields" id="personalFields">
+          <div class="section-divider">Personal Information</div>
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="John Doe">
+            <div class="error-msg">Enter your name</div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" placeholder="john@example.com">
+              <div class="error-msg">Enter a valid email</div>
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="text" id="phone" placeholder="+1 234 567 890">
+              <div class="error-msg">Enter a valid phone</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender">
+              <option value="" disabled selected>Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-predict" id="predictBtn">
+          <span class="btn-text">🚀 Predict Loan Status</span>
+          <div class="spinner"></div>
+        </button>
+      </form>
+
+      <!-- Result -->
+      <div class="result-box" id="resultBox">
+        <span class="result-icon" id="resultIcon"></span>
+        <span id="resultText"></span>
+        <div class="result-sub" id="resultSub"></div>
+      </div>
+    </div>
+
+    <div class="footer">Smart Loan Approval System</div>
+  </div>
+
+  <script>
+    let currentTab = 'quick';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-quick').classList.toggle('active', tab === 'quick');
+      document.getElementById('tab-full').classList.toggle('active', tab === 'full');
+      document.getElementById('personalFields').classList.toggle('show', tab === 'full');
+      clearResult();
+      clearValidation();
+    }
+
+    function clearResult() {
+      const r = document.getElementById('resultBox');
+      r.className = 'result-box';
+      r.style.display = 'none';
+    }
+
+    function clearValidation() {
+      document.querySelectorAll('.form-group').forEach(g => g.classList.remove('invalid'));
+    }
+
+    function showError(id) {
+      document.getElementById(id).closest('.form-group').classList.add('invalid');
+    }
+
+    function validate() {
+      clearValidation();
+      let ok = true;
+      const cs = +document.getElementById('credit_score').value;
+      if (!cs || cs < 300 || cs > 900) { showError('credit_score'); ok = false; }
+
+      const inc = +document.getElementById('income_annum').value;
+      if (!document.getElementById('income_annum').value || inc < 0) { showError('income_annum'); ok = false; }
+
+      const la = +document.getElementById('loan_amount').value;
+      if (!la || la < 1) { showError('loan_amount'); ok = false; }
+
+      if (!document.getElementById('employment_status').value) { showError('employment_status'); ok = false; }
+
+      const lt = +document.getElementById('loan_term').value;
+      if (!lt || lt < 1 || lt > 480) { showError('loan_term'); ok = false; }
+
+      if (currentTab === 'full') {
+        if (!document.getElementById('name').value.trim()) { showError('name'); ok = false; }
+        const em = document.getElementById('email').value.trim();
+        if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { showError('email'); ok = false; }
+        if (!document.getElementById('phone').value.trim()) { showError('phone'); ok = false; }
+      }
+      return ok;
+    }
+
+    document.getElementById('loanForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (!validate()) return;
+
+      const btn = document.getElementById('predictBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      clearResult();
+
+      const payload = {
+        credit_score: +document.getElementById('credit_score').value,
+        income_annum: +document.getElementById('income_annum').value,
+        loan_amount: +document.getElementById('loan_amount').value,
+        employment_status: document.getElementById('employment_status').value,
+        loan_term: +document.getElementById('loan_term').value
+      };
+
+      if (currentTab === 'full') {
+        payload.name = document.getElementById('name').value.trim();
+        payload.email = document.getElementById('email').value.trim();
+        payload.phone = document.getElementById('phone').value.trim();
+        payload.gender = document.getElementById('gender').value || '';
+      }
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        showResult(data);
+      } catch (err) {
+        showResult({ error: true });
+      } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    });
+
+    function showResult(data) {
+      const box = document.getElementById('resultBox');
+      const icon = document.getElementById('resultIcon');
+      const text = document.getElementById('resultText');
+      const sub = document.getElementById('resultSub');
+
+      // Error case
+      if (data.error) {
+        box.className = 'result-box rejected';
+        box.style.display = 'block';
+        icon.textContent = '⚠️';
+        text.textContent = 'Connection Error';
+        sub.textContent = 'Make sure backend is running';
+        return;
+      }
+
+      // Get status correctly
+      const status = (data.status || "").toLowerCase();
+
+      if (status === "approved") {
+        box.className = 'result-box approved';
+        box.style.display = 'block';
+        icon.textContent = '✅';
+        text.textContent = 'High Approval Probability';
+        sub.textContent = 'Our model predicts a high likelihood of loan approval.';
+      } else {
+        box.className = 'result-box rejected';
+        box.style.display = 'block';
+        icon.textContent = '❌';
+        text.textContent = 'Low Approval Probability';
+        sub.textContent = 'Our model predicts a low chance of loan approval.';
+      }
+    }
+  </script>
+
+</body>
+
+</html>
