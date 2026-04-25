@@ -1,4 +1,4 @@
-<img width="269" height="269" alt="image" src="https://github.com/user-attachments/assets/f472b399-f9c7-4a35-ae67-0e72474729c8" /># 💼 Smart Loan Approval System
+💼 Smart Loan Approval System
 
 An AI-powered web application that predicts loan approval status based on user financial details.
 
@@ -17,10 +17,10 @@ An AI-powered web application that predicts loan approval status based on user f
 
 ## 🧠 Technologies Used
 
-* Python 🐍
-* Flask 🌐
+* Python 
+* Flask 
 * Machine Learning (Scikit-learn)
-* MySQL Database 🗄️
+* MySQL Database 
 * HTML, CSS, JavaScript 
 
 ---
