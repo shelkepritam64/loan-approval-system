@@ -1,17 +1,17 @@
-# 💼 Smart Loan Approval System
+<img width="269" height="269" alt="image" src="https://github.com/user-attachments/assets/f472b399-f9c7-4a35-ae67-0e72474729c8" /># 💼 Smart Loan Approval System
 
 An AI-powered web application that predicts loan approval status based on user financial details.
 
 ---
 
-## 🚀 Features
+## ⭐ Features
 
-* 🔍 **Loan Prediction using Machine Learning**
-* ⚡ **Quick Prediction Mode**
-* 🧾 **Full Application Mode (with user details)**
-* 💾 **MySQL Database Integration**
-* 🌐 **Flask Backend + Custom Frontend UI**
-* 🎯 Real-time prediction results
+*    **Loan Prediction using Machine Learning**
+*    **Quick Prediction Mode**
+*    **Full Application Mode (with user details)**
+*    **MySQL Database Integration**
+*    **Flask Backend + Custom Frontend UI**
+*    Real-time prediction results
 
 ---
 
@@ -21,7 +21,7 @@ An AI-powered web application that predicts loan approval status based on user f
 * Flask 🌐
 * Machine Learning (Scikit-learn)
 * MySQL Database 🗄️
-* HTML, CSS, JavaScript 🎨
+* HTML, CSS, JavaScript 
 
 ---
 
@@ -89,8 +89,8 @@ You can share using Ngrok or deploy on cloud platforms like Render.
 
 ## 👨‍💻 Author
 
-**Pritam Shelke**
-**Manthan Shah**
+**Pritam Shelke**,
+**Manthan Shah**,
 **jayesh Sawant**
 
 ---
