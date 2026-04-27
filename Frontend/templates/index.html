@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banking Loan Risk Assessment System</title>
+  <meta name="description" content="Banking loan risk assessment with real-time credit analysis.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🏦</div>
+      <h1>Banking Loan Risk Assessment</h1>
+      <p>credit risk analysis &amp; decision system</p>
+    </div>
+
+    <div class="card">
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-quick" onclick="switchTab('quick')">&#9889; Quick Prediction</button>
+        <button class="tab-btn" id="tab-full" onclick="switchTab('full')">&#128203; Full Application</button>
+      </div>
+
+      <form id="loanForm" novalidate>
+        <!-- SECTION: Loan Details -->
+        <div class="section-divider">Loan &amp; Credit Details</div>
+
+        <div class="form-group">
+          <label for="credit_score">Credit Score</label>
+          <input type="number" id="credit_score" placeholder="e.g. 720" min="300" max="900" required>
+          <div class="error-msg">Enter a valid score (300-900)</div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label for="income_annum">Annual Income</label>
+            <input type="number" id="income_annum" placeholder="e.g. 800000" min="0" required>
+            <div class="error-msg">Enter a valid income</div>
+          </div>
+          <div class="form-group">
+            <label for="loan_amount">Loan Amount</label>
+            <input type="number" id="loan_amount" placeholder="e.g. 500000" min="1" required>
+            <div class="error-msg">Enter a valid amount</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label for="employment_status">Employment Status</label>
+            <select id="employment_status" required>
+              <option value="" disabled selected>Select status</option>
+              <option value="Employed">Employed</option>
+              <option value="Self-Employed">Self-Employed</option>
+              <option value="Unemployed">Unemployed</option>
+            </select>
+            <div class="error-msg">Select a status</div>
+          </div>
+          <div class="form-group">
+            <label for="loan_term">Loan Term (months)</label>
+            <input type="number" id="loan_term" placeholder="e.g. 60" min="1" max="480" required>
+            <div class="error-msg">Enter a valid term (1-480)</div>
+          </div>
+        </div>
+
+        <!-- SECTION: Extended Financial (Full App) -->
+        <div class="personal-fields" id="extendedFields">
+          <div class="section-divider">Financial History</div>
+          <div class="row">
+            <div class="form-group">
+              <label for="age">Age</label>
+              <input type="number" id="age" placeholder="e.g. 32" min="18" max="100">
+              <div class="error-msg">Enter valid age (18-100)</div>
+            </div>
+            <div class="form-group">
+              <label for="years_of_employment">Years of Employment</label>
+              <input type="number" id="years_of_employment" placeholder="e.g. 5" min="0" max="50">
+              <div class="error-msg">Enter valid years</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label for="existing_loans">Existing Loans</label>
+              <input type="number" id="existing_loans" placeholder="e.g. 2" min="0" max="20">
+              <div class="error-msg">Enter valid count</div>
+            </div>
+            <div class="form-group">
+              <label for="existing_emis">Monthly EMI Payments</label>
+              <input type="number" id="existing_emis" placeholder="e.g. 15000" min="0">
+              <div class="error-msg">Enter valid EMI amount</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label for="bank_balance">Bank Balance</label>
+              <input type="number" id="bank_balance" placeholder="e.g. 250000" min="0">
+              <div class="error-msg">Enter valid balance</div>
+            </div>
+            <div class="form-group">
+              <label for="previous_defaults">Previous Defaults</label>
+              <input type="number" id="previous_defaults" placeholder="e.g. 0" min="0" max="10">
+              <div class="error-msg">Enter valid count</div>
+            </div>
+          </div>
+
+          <div class="section-divider">Collateral &amp; Security</div>
+          <div class="form-group">
+            <label for="collateral_value">Collateral Value</label>
+            <input type="number" id="collateral_value" placeholder="e.g. 700000" min="0">
+            <div class="error-msg">Enter valid value</div>
+          </div>
+
+          <div class="section-divider">Personal Information</div>
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="John Doe">
+            <div class="error-msg">Enter your name</div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" placeholder="john@example.com">
+              <div class="error-msg">Enter a valid email</div>
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="text" id="phone" placeholder="+91 98765 43210">
+              <div class="error-msg">Enter a valid phone</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender">
+              <option value="" disabled selected>Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-predict" id="predictBtn">
+          <span class="btn-text">&#128640; Analyze Risk</span>
+          <div class="spinner"></div>
+        </button>
+      </form>
+
+      <!-- Enhanced Result Display -->
+      <div class="result-panel" id="resultPanel" style="display:none;">
+        <!-- Risk Gauge -->
+        <div class="risk-gauge-container">
+          <svg class="risk-gauge" viewBox="0 0 200 120" id="riskGauge">
+            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14"
+              stroke-linecap="round" />
+            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#gaugeGrad)" stroke-width="14"
+              stroke-linecap="round" id="gaugeArc" stroke-dasharray="0 251"
+              style="transition: stroke-dasharray 1.5s ease;" />
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#10b981" />
+                <stop offset="50%" stop-color="#f59e0b" />
+                <stop offset="100%" stop-color="#ef4444" />
+              </linearGradient>
+            </defs>
+            <text x="100" y="85" text-anchor="middle" fill="#f1f5f9" font-size="28" font-weight="700"
+              font-family="Inter" id="gaugeText">0%</text>
+            <text x="100" y="105" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="500"
+              font-family="Inter">RISK SCORE</text>
+          </svg>
+        </div>
+
+        <!-- Decision Badge -->
+        <div class="decision-row">
+          <div class="decision-badge" id="decisionBadge">—</div>
+          <div class="decision-label" id="decisionLabel">Analyzing...</div>
+        </div>
+
+        <!-- Info Cards Row -->
+        <div class="result-cards">
+          <div class="result-mini-card">
+            <span class="rmc-label">EMI</span>
+            <span class="rmc-value" id="emiValue">—</span>
+          </div>
+          <div class="result-mini-card">
+            <span class="rmc-label">Int. Rate</span>
+            <span class="rmc-value" id="interestRateValue">—</span>
+          </div>
+          <div class="result-mini-card">
+            <span class="rmc-label">Total Int.</span>
+            <span class="rmc-value" id="totalInterestValue">—</span>
+          </div>
+          <div class="result-mini-card">
+            <span class="rmc-label">DTI Ratio</span>
+            <span class="rmc-value" id="dtiValue">—</span>
+          </div>
+          <div class="result-mini-card">
+            <span class="rmc-label">LTV Ratio</span>
+            <span class="rmc-value" id="ltvValue">—</span>
+          </div>
+        </div>
+
+        <!-- Fraud Flags -->
+        <div class="fraud-section" id="fraudSection" style="display:none;">
+          <div class="fraud-title">&#9888;&#65039; Fraud Indicators</div>
+          <ul class="fraud-list" id="fraudList"></ul>
+        </div>
+
+        <!-- Explanations -->
+        <div class="explanation-section" id="explanationSection">
+          <div class="explanation-title">Key Decision Factors</div>
+          <div class="explanation-list" id="explanationList"></div>
+        </div>
+
+        <!-- Feature Importance -->
+        <div class="feat-section" id="featSection" style="display:none;">
+          <div class="explanation-title">Top Model Features</div>
+          <div class="feat-bars" id="featBars"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Banking Loan Risk Assessment System &nbsp;&middot;&nbsp;
+      <a href="/login" class="admin-link">&#128274; Admin Panel</a>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

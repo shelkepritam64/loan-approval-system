@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Banking Risk System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body class="dashboard-body">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">&#127974;</div>
+      <div class="sidebar-brand">
+        <span class="brand-name">LoanAdmin</span>
+        <span class="brand-tag">Risk Dashboard</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/dashboard" class="nav-item active"><span class="nav-icon">&#128202;</span><span class="nav-text">Overview</span></a>
+      <a href="/" class="nav-item"><span class="nav-icon">&#128221;</span><span class="nav-text">Loan Form</span></a>
+      <a href="/export-csv" class="nav-item"><span class="nav-icon">&#128229;</span><span class="nav-text">Export CSV</span></a>
+      <a href="/logout" class="nav-item nav-logout"><span class="nav-icon">&#128682;</span><span class="nav-text">Logout</span></a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">&#9776;</button>
+      <div class="topbar-left">
+        <h2 class="page-title">Dashboard Overview</h2>
+        <p class="page-subtitle">Real-time loan risk analytics</p>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-badge"><span class="admin-avatar">&#128100;</span><span class="admin-name">Admin</span></div>
+      </div>
+    </header>
+
+    <!-- Stats Cards -->
+    <section class="stats-grid">
+      <div class="stat-card stat-card--primary">
+        <div class="stat-icon">&#128203;</div>
+        <div class="stat-info"><span class="stat-label">Total Applications</span><span class="stat-value">{{ stats.total_applications }}</span></div>
+        <div class="stat-glow"></div>
+      </div>
+      <div class="stat-card stat-card--success">
+        <div class="stat-icon">&#9989;</div>
+        <div class="stat-info"><span class="stat-label">Approved</span><span class="stat-value">{{ stats.approved_count }}</span></div>
+        <div class="stat-glow"></div>
+      </div>
+      <div class="stat-card stat-card--danger">
+        <div class="stat-icon">&#10060;</div>
+        <div class="stat-info"><span class="stat-label">Rejected</span><span class="stat-value">{{ stats.rejected_count }}</span></div>
+        <div class="stat-glow"></div>
+      </div>
+      <div class="stat-card stat-card--info">
+        <div class="stat-icon">&#128176;</div>
+        <div class="stat-info"><span class="stat-label">Avg. Income</span><span class="stat-value">₹{{ "{:,.0f}".format(stats.avg_income) }}</span></div>
+        <div class="stat-glow"></div>
+      </div>
+      <div class="stat-card stat-card--warning">
+        <div class="stat-icon">&#127991;&#65039;</div>
+        <div class="stat-info"><span class="stat-label">Avg. Loan Amount</span><span class="stat-value">₹{{ "{:,.0f}".format(stats.avg_loan_amount) }}</span></div>
+        <div class="stat-glow"></div>
+      </div>
+      <div class="stat-card stat-card--purple">
+        <div class="stat-icon">&#128200;</div>
+        <div class="stat-info"><span class="stat-label">Credit Score Range</span><span class="stat-value">{{ stats.min_credit }} - {{ stats.max_credit }}</span></div>
+        <div class="stat-glow"></div>
+      </div>
+    </section>
+
+    <!-- Charts Row -->
+    <section class="charts-row">
+      <div class="chart-card">
+        <div class="chart-header"><h3 class="chart-title">Approval Distribution</h3><span class="chart-badge">Pie</span></div>
+        <div class="chart-body"><canvas id="approvalChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><h3 class="chart-title">Employment Breakdown</h3><span class="chart-badge">Bar</span></div>
+        <div class="chart-body"><canvas id="employmentChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><h3 class="chart-title">Risk Distribution</h3><span class="chart-badge">Doughnut</span></div>
+        <div class="chart-body"><canvas id="riskChart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="filter-bar">
+      <form method="GET" action="/dashboard" class="filter-form" id="filterForm">
+        <div class="filter-group">
+          <input type="text" name="search" placeholder="&#128269; Search by name or email..." value="{{ stats.search }}" class="filter-input">
+        </div>
+        <div class="filter-group">
+          <select name="risk" class="filter-select">
+            <option value="all" {{ 'selected' if stats.risk_filter=='all' }}>All Risks</option>
+            <option value="Low Risk" {{ 'selected' if stats.risk_filter=='Low Risk' }}>Low Risk</option>
+            <option value="Medium Risk" {{ 'selected' if stats.risk_filter=='Medium Risk' }}>Medium Risk</option>
+            <option value="High Risk" {{ 'selected' if stats.risk_filter=='High Risk' }}>High Risk</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <select name="sort" class="filter-select">
+            <option value="created_at" {{ 'selected' if stats.sort_by=='created_at' }}>Sort: Date</option>
+            <option value="risk_score" {{ 'selected' if stats.sort_by=='risk_score' }}>Sort: Risk Score</option>
+            <option value="loan_amount" {{ 'selected' if stats.sort_by=='loan_amount' }}>Sort: Loan Amount</option>
+            <option value="credit_score" {{ 'selected' if stats.sort_by=='credit_score' }}>Sort: Credit Score</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <select name="dir" class="filter-select">
+            <option value="DESC" {{ 'selected' if stats.sort_dir=='DESC' }}>Descending</option>
+            <option value="ASC" {{ 'selected' if stats.sort_dir=='ASC' }}>Ascending</option>
+          </select>
+        </div>
+        <button type="submit" class="filter-btn">Apply</button>
+      </form>
+    </section>
+
+    <!-- Applications Table -->
+    <section class="table-card">
+      <div class="table-header">
+        <h3 class="table-title">&#128196; Applications</h3>
+        <a href="/export-csv" class="export-btn">&#128229; Export CSV</a>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Name</th><th>Credit</th><th>Income</th><th>Loan</th>
+              <th>Risk Score</th><th>Risk Level</th><th>Result</th><th>EMI</th><th>Rate</th><th>Total Int.</th><th>Date</th><th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if stats.recent_applications %}
+              {% for app in stats.recent_applications %}
+              <tr>
+                <td>#{{ app.id }}</td>
+                <td>{{ app.name or '-' }}</td>
+                <td>{{ app.credit_score }}</td>
+                <td>₹ {{ "{:,.0f}".format(app.income_annum) }}</td>
+                <td>₹ {{ "{:,.0f}".format(app.loan_amount) }}</td>
+                <td>
+                  <div class="risk-bar-cell">
+                    <div class="risk-bar-bg"><div class="risk-bar-fill" style="width:{{ app.risk_score or 0 }}%;background:{{ '#10b981' if (app.risk_score or 0) <= 30 else '#f59e0b' if (app.risk_score or 0) <= 60 else '#ef4444' }}"></div></div>
+                    <span>{{ app.risk_score or 0 }}%</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="risk-badge risk-{{ (app.risk_level or 'unknown')|lower|replace(' ', '-') }}">{{ app.risk_level or '-' }}</span>
+                </td>
+                <td>
+                  {% if app.prediction_result == 'Approved' %}
+                    <span class="status-badge status-approved">Approved</span>
+                  {% else %}
+                    <span class="status-badge status-rejected">Rejected</span>
+                  {% endif %}
+                </td>
+                <td>₹ {{ "{:,.0f}".format(app.emi_amount or 0) }}/mo</td>
+                <td>{{ app.interest_rate or 0 }}%</td>
+                <td>₹ {{ "{:,.0f}".format(app.total_interest or 0) }}</td>
+                <td>{{ app.created_at.strftime('%b %d, %Y') if app.created_at else '-' }}</td>
+                <td><button class="detail-btn" onclick="viewDetail({{ app.id }})">View</button></td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="13" class="empty-state">No applications found.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Application Detail Modal -->
+  <div class="modal-overlay" id="modalOverlay" style="display:none;" onclick="closeModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Application Details</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Charts =====
+    const approved = {{ stats.approved_count }};
+    const rejected = {{ stats.rejected_count }};
+    if(approved>0||rejected>0){
+      new Chart(document.getElementById('approvalChart'),{
+        type:'pie',
+        data:{labels:['Approved','Rejected'],datasets:[{data:[approved,rejected],backgroundColor:['#10b981','#ef4444'],borderWidth:0,hoverOffset:8}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{family:'Inter',size:12},padding:16,usePointStyle:true}}}}
+      });
+    }
+
+    const empL=[{% for e in stats.employment_data %}"{{e.employment_status or 'Unknown'}}"{% if not loop.last %},{% endif %}{% endfor %}];
+    const empC=[{% for e in stats.employment_data %}{{e.cnt}}{% if not loop.last %},{% endif %}{% endfor %}];
+    if(empL.length>0){
+      new Chart(document.getElementById('employmentChart'),{
+        type:'bar',
+        data:{labels:empL,datasets:[{label:'Count',data:empC,backgroundColor:['rgba(99,102,241,0.7)','rgba(168,85,247,0.7)','rgba(236,72,153,0.7)'],borderColor:['rgba(99,102,241,1)','rgba(168,85,247,1)','rgba(236,72,153,1)'],borderWidth:2,borderRadius:8,barThickness:36}]},
+        options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{color:'#94a3b8',stepSize:1},grid:{color:'rgba(148,163,184,0.08)'}},x:{ticks:{color:'#94a3b8'},grid:{display:false}}},plugins:{legend:{display:false}}}
+      });
+    }
+
+    const riskL=[{% for r in stats.risk_data %}"{{r.risk_level}}"{% if not loop.last %},{% endif %}{% endfor %}];
+    const riskC=[{% for r in stats.risk_data %}{{r.cnt}}{% if not loop.last %},{% endif %}{% endfor %}];
+    if(riskL.length>0){
+      new Chart(document.getElementById('riskChart'),{
+        type:'doughnut',
+        data:{labels:riskL,datasets:[{data:riskC,backgroundColor:['#10b981','#f59e0b','#ef4444'],borderWidth:0,hoverOffset:8}]},
+        options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{family:'Inter',size:12},padding:16,usePointStyle:true}}}}
+      });
+    }
+
+    // ===== Application Detail Modal =====
+    function viewDetail(id){
+      document.getElementById('modalOverlay').style.display='flex';
+      document.getElementById('modalBody').innerHTML='<div class="modal-loading">Loading...</div>';
+      fetch('/application/'+id)
+        .then(r=>r.json())
+        .then(d=>{
+          if(d.error){document.getElementById('modalBody').innerHTML='<p>Not found</p>';return;}
+          const riskColor=d.risk_score<=30?'#10b981':d.risk_score<=60?'#f59e0b':'#ef4444';
+          let html=`
+            <div class="modal-grid">
+              <div class="modal-section">
+                <h4>Applicant</h4>
+                <div class="modal-row"><span>Name:</span><strong>${d.name||'-'}</strong></div>
+                <div class="modal-row"><span>Email:</span><strong>${d.email||'-'}</strong></div>
+                <div class="modal-row"><span>Phone:</span><strong>${d.phone||'-'}</strong></div>
+                <div class="modal-row"><span>Gender:</span><strong>${d.gender||'-'}</strong></div>
+                <div class="modal-row"><span>Age:</span><strong>${d.age||'-'}</strong></div>
+                <div class="modal-row"><span>Employment:</span><strong>${d.employment_status||'-'}</strong></div>
+                <div class="modal-row"><span>Years Employed:</span><strong>${d.years_of_employment||'-'}</strong></div>
+              </div>
+              <div class="modal-section">
+                <h4>Financial</h4>
+                <div class="modal-row"><span>Credit Score:</span><strong>${d.credit_score}</strong></div>
+                <div class="modal-row"><span>Income:</span><strong>₹${Number(d.income_annum).toLocaleString()}</strong></div>
+                <div class="modal-row"><span>Loan Amount:</span><strong>₹${Number(d.loan_amount).toLocaleString()}</strong></div>
+                <div class="modal-row"><span>Loan Term:</span><strong>${d.loan_term} months</strong></div>
+                <div class="modal-row"><span>Existing Loans:</span><strong>${d.existing_loans||0}</strong></div>
+                <div class="modal-row"><span>Existing EMIs:</span><strong>₹${Number(d.existing_emis||0).toLocaleString()}</strong></div>
+                <div class="modal-row"><span>Bank Balance:</span><strong>₹${Number(d.bank_balance||0).toLocaleString()}</strong></div>
+                <div class="modal-row"><span>Previous Defaults:</span><strong>${d.previous_defaults||0}</strong></div>
+                <div class="modal-row"><span>Collateral:</span><strong>₹${Number(d.collateral_value||0).toLocaleString()}</strong></div>
+              </div>
+            </div>
+            <div class="modal-result">
+              <div class="modal-result-item">
+                <span>Risk Score</span>
+                <strong style="color:${riskColor};font-size:1.5rem">${d.risk_score||0}%</strong>
+              </div>
+              <div class="modal-result-item">
+                <span>Risk Level</span>
+                <strong>${d.risk_level||'-'}</strong>
+              </div>
+              <div class="modal-result-item">
+                <span>Decision</span>
+                <strong style="color:${d.prediction_result==='Approved'?'#10b981':'#ef4444'}">${d.prediction_result}</strong>
+              </div>
+              <div class="modal-result-item">
+                <span>EMI</span>
+                <strong>₹${Number(d.emi_amount||0).toLocaleString()}</strong>
+              </div>
+              <div class="modal-result-item">
+                <span>Interest Rate</span>
+                <strong>${d.interest_rate||0}%</strong>
+              </div>
+              <div class="modal-result-item">
+                <span>Total Interest</span>
+                <strong>₹${Number(d.total_interest||0).toLocaleString()}</strong>
+              </div>
+              <div class="modal-result-item">
+                <span>DTI Ratio</span>
+                <strong>${((d.dti_ratio||0)*100).toFixed(1)}%</strong>
+              </div>
+              <div class="modal-result-item">
+                <span>LTV Ratio</span>
+                <strong>${((d.ltv_ratio||0)*100).toFixed(1)}%</strong>
+              </div>
+            </div>`;
+          if(d.fraud_flags){
+            try{
+              const flags=JSON.parse(d.fraud_flags);
+              if(flags.length>0){
+                html+=`<div class="modal-fraud"><strong>Fraud Flags:</strong> ${flags.join(', ')}</div>`;
+              }
+            }catch(e){}
+          }
+          document.getElementById('modalBody').innerHTML=html;
+        })
+        .catch(()=>{document.getElementById('modalBody').innerHTML='<p>Error loading details.</p>';});
+    }
+
+    function closeModal(){document.getElementById('modalOverlay').style.display='none';}
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+  </script>
+</body>
+</html>
